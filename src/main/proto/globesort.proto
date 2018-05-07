@@ -13,4 +13,5 @@ message Empty { }
 
 message IntArray {
   repeated int32 values = 1;
+  int64 sort_time      = 2;
 }

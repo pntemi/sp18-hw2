@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.lang.RuntimeException;
 import java.lang.Exception;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.ArrayList;
@@ -39,14 +41,33 @@ public class GlobeSortClient {
     }
 
     public void run(Integer[] values) throws Exception {
+
         System.out.println("Pinging " + serverStr + "...");
+        Instant start = Instant.now();
         serverStub.ping(Empty.newBuilder().build());
+        Instant end = Instant.now();
+        Duration d = Duration.between(start, end);
+        long twoWayLat = d.getSeconds();
         System.out.println("Ping successful.");
+        System.out.println("--------------------------------");
 
         System.out.println("Requesting server to sort array");
         IntArray request = IntArray.newBuilder().addAllValues(Arrays.asList(values)).build();
+        start = Instant.now();
         IntArray response = serverStub.sortIntegers(request);
+        end = Instant.now();
+        d = Duration.between(start, end);
+        long overallSortTime = d.getSeconds();
+        double appThroughput = values.length/overallSortTime;
+        double netThroughput = values.length/(overallSortTime - response.getSortTime());
         System.out.println("Sorted array");
+
+
+        System.out.println("One-way Latency: " + twoWayLat/2 + "s");
+        System.out.println("Application Throughput: " + appThroughput);
+        System.out.println("Network Throughput: " + netThroughput/2);
+        System.out.println("================================");
+
     }
 
     public void shutdown() throws InterruptedException {

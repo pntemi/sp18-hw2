@@ -7,6 +7,8 @@ import net.sourceforge.argparse4j.*;
 import net.sourceforge.argparse4j.inf.*;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -86,12 +88,20 @@ public class GlobeSortServer {
 
         @Override
         public void sortIntegers(IntArray req, final StreamObserver<IntArray> responseObserver) {
+            Instant start = Instant.now();
             Integer[] values = req.getValuesList().toArray(new Integer[req.getValuesList().size()]);
             Arrays.sort(values);
+            Instant end = Instant.now();
+
+            Duration duration = Duration.between(start, end);
+            long sortTime = duration.getSeconds();
+
             IntArray.Builder responseBuilder = IntArray.newBuilder();
+            responseBuilder.setSortTime(sortTime);
             for(Integer val : values) {
                 responseBuilder.addValues(val);
             }
+
             IntArray response = responseBuilder.build();
             responseObserver.onNext(response);
             responseObserver.onCompleted();
