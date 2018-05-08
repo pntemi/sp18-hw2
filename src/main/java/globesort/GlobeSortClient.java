@@ -47,7 +47,7 @@ public class GlobeSortClient {
         serverStub.ping(Empty.newBuilder().build());
         Instant end = Instant.now();
         Duration d = Duration.between(start, end);
-        long twoWayLat = d.getSeconds();
+        long twoWayLat = d.getNano()/1000000;
         System.out.println("Ping successful.");
         System.out.println("--------------------------------");
 
@@ -59,12 +59,15 @@ public class GlobeSortClient {
         d = Duration.between(start, end);
         long overallSortTime = d.getSeconds();
         double appThroughput = values.length/overallSortTime;
-        double netThroughput = values.length/(overallSortTime - response.getSortTime());
+        long networkTime = overallSortTime - response.getSortTime();
+        double netThroughput = values.length/networkTime;
         System.out.println("Sorted array");
 
 
-        System.out.println("One-way Latency: " + twoWayLat/2 + "s");
+        System.out.println("One-way Latency: " + twoWayLat/2 + "ms");
+        System.out.println("Application Time: " + overallSortTime + "s");
         System.out.println("Application Throughput: " + appThroughput);
+        System.out.println("One-way Network Time: " + networkTime/2 + "s");
         System.out.println("Network Throughput: " + netThroughput/2);
         System.out.println("================================");
 
